@@ -14,7 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   vfxNames:
   - prefab_hand_trail
+  - prefab_hand
   itemVfxs:
   - vfxName: 0
     vfxPrefab: {fileID: 7721503645036885989, guid: 4dbc885114831ca42a6fe556011a6d19,
       type: 3}
+  - vfxName: 1
+    vfxPrefab: {fileID: 0}

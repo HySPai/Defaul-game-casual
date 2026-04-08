@@ -1,0 +1,148 @@
+﻿#pragma kernel CSMain
+
+RWTexture2D<float4> Input;
+RWTexture2D<float4> Result;
+RWStructuredBuffer<uint> Claims;
+
+int Width;
+int Height;
+int SimStep;
+
+float4 BGColor;
+int SandColorType;
+RWStructuredBuffer<float4> SandColors;
+int NumSandColors;
+
+bool DoSimulation;
+float BrushRad;
+float2 MousePos;
+bool MouseDownLeft;
+bool MouseDownRight;
+
+bool colorEqual(float4 a, float4 b)
+{
+    float threshold = 0.05;
+    return abs(a.x - b.x) < threshold && abs(a.y - b.y) < threshold && abs(a.z - b.z) < threshold;
+}
+
+float random (float2 uv)
+{
+    return frac(sin(dot(uv,float2(12.9898,78.233)))*43758.5453123);
+}
+
+float4 sampleGradientBuffer(float sampleLocation, uint length, RWStructuredBuffer<float4> colors)
+{
+    float localSampleLocation = sampleLocation*(length - 1);
+    return lerp((colors[floor(localSampleLocation)]), colors[ceil(localSampleLocation)], frac(localSampleLocation));
+}
+
+void DrawParticles(uint3 id)
+{
+    if(distance(id.xy, MousePos) >= BrushRad) return;
+
+    if(MouseDownLeft)
+    {
+        Result[id.xy] = SandColorType == 0 ? 
+            lerp(SandColors[0], SandColors[1], random(id.xy)) : 
+            sampleGradientBuffer(SimStep % 2000 / 2000.0, NumSandColors, SandColors);
+    }
+}
+
+void EraseParticles(uint3 id)
+{
+    if(distance(id.xy, MousePos) >= BrushRad) return;
+
+    if(MouseDownRight)
+    {
+        Result[id.xy] = BGColor;
+    }
+}
+
+//Returns true if unclaimed
+bool AtomicCheckUnclaimed(uint2 id)
+{
+    uint index = id.y*Width + id.x;
+    uint previous;
+    InterlockedCompareExchange(Claims[index], 0, 1, previous);
+    return previous == 0;
+}
+
+void HandleSimulation(uint3 id)
+{
+    if (id.y <= 0 || id.y >= Height)
+        return;
+
+    bool canLeft = id.x > 0;
+    bool canRight = id.x < Width - 1;
+
+    uint2 d = uint2(id.x, id.y - 1);
+    uint2 dl = canLeft ? uint2(id.x - 1, id.y - 1) : id.xy;
+    uint2 dr = canRight ? uint2(id.x + 1, id.y - 1) : id.xy;
+
+    bool oddFrame = SimStep % 2 == 1;
+
+    uint2 maybeDr = oddFrame ? dr : dl;
+    uint2 maybeDl = oddFrame ? dl : dr;
+
+    if (!colorEqual(Input[id.xy], BGColor))
+    {
+        if (colorEqual(Input[d], BGColor) && AtomicCheckUnclaimed(d))
+        {
+            Result[id.xy] = BGColor;
+            Result[d] = Input[id.xy];
+        }
+        else if ((maybeDr.x != id.x || maybeDr.y != id.y) &&
+                colorEqual(Input[maybeDr], BGColor) &&
+                AtomicCheckUnclaimed(maybeDr))
+        {
+            Result[id.xy] = BGColor;
+            Result[maybeDr] = Input[id.xy];
+        }
+        else if ((maybeDl.x != id.x || maybeDl.y != id.y) &&
+                colorEqual(Input[maybeDl], BGColor) &&
+                AtomicCheckUnclaimed(maybeDl))
+        {
+            Result[id.xy] = BGColor;
+            Result[maybeDl] = Input[id.xy];
+        }
+        else
+        {
+            Result[id.xy] = Input[id.xy];
+        }
+    }
+}
+
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    if(DoSimulation)
+    {
+        HandleSimulation(id);
+    }
+
+    DrawParticles(id);
+    EraseParticles(id);
+}
+
+#pragma kernel Initialize
+
+[numthreads(8,8,1)]
+void Initialize (uint3 id : SV_DispatchThreadID)
+{
+    Result[id.xy] = BGColor;
+}
+
+#pragma kernel InitializeFromTexture
+
+StructuredBuffer<float4> InitData;
+
+[numthreads(8, 8, 1)]
+void InitializeFromTexture(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= Width || id.y >= Height)
+        return;
+
+    uint index = id.y * Width + id.x;
+
+    Result[id.xy] = InitData[index];
+}
