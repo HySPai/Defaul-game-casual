@@ -1,5 +1,18 @@
 public enum ColorName
 {
-    Blue,
+    Orange,
     Yellow,
+    Pink,
+    Green,
+    Red,
+    Turquoise,
+    DarkBlue,
+    Brown,
+    Purple,
+    DarkRed,
+    Blue,
+    DarkGreen,
+    Be,
+    Black,
+    White,
 }

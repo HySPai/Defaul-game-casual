@@ -46,6 +46,15 @@ public class SO_Color : ScriptableObject
         Debug.LogError("Không tìm thấy Color: " + colorName);
         return Color.white;
     }
+    public Color[] GetAllColors()
+    {
+        Color[] result = new Color[colorIDs.Length];
+        for (int i = 0; i < colorIDs.Length; i++)
+        {
+            result[i] = colorIDs[i].color;
+        }
+        return result;
+    }
 }
 [Serializable]
 public class ColorID

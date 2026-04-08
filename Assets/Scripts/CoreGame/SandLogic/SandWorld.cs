@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class SandWorld : MonoBehaviour
 {
@@ -13,6 +13,9 @@ public class SandWorld : MonoBehaviour
     [Header("Simulation")]
     public float stepsPerSecond = 60f;
 
+    [Header("Collider")]
+    public PolygonCollider2D worldCollider;
+
     [Header("Color")]
     public SO_Color colorDatabase;
     public ColorName currentColor = ColorName.Yellow;
@@ -21,7 +24,7 @@ public class SandWorld : MonoBehaviour
 
     private SandSimulation sand;
     private PixelDrawer drawer;
-
+    private PixelCollider pixelCollider;
     public PixelDrawer Drawer => drawer;
 
     public Color32 CurrentColor32
@@ -45,12 +48,14 @@ public class SandWorld : MonoBehaviour
 
         sand = new SandSimulation(canvas);
         drawer = new PixelDrawer(canvas);
+        pixelCollider = new PixelCollider(canvas, pixelSize);
     }
 
     void Update()
     {
         RunSimulation();
         canvas.Apply();
+        pixelCollider.Build(worldCollider);
     }
 
     void RunSimulation()
