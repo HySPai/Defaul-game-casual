@@ -21,7 +21,6 @@ public class SandSimulation
 
     bool IsSand(Color32 c)
     {
-        // tất cả pixel khác empty đều là "cát"
         return !c.Equals(emptyColor);
     }
 
@@ -60,14 +59,14 @@ public class SandSimulation
 
         int belowY = y - 1;
 
-        // 1. ↓ rơi thẳng
+        // rơi thẳng
         if (IsEmpty(x, belowY))
         {
             Move(x, y, x, belowY, current);
             return;
         }
 
-        // 2. chéo có "nền"
+        // chéo
         bool canLeft = IsEmpty(x - 1, belowY) && !IsEmpty(x - 1, belowY - 1);
         bool canRight = IsEmpty(x + 1, belowY) && !IsEmpty(x + 1, belowY - 1);
 

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Dreamteck.Splines;
 using UnityEngine;
 
@@ -10,18 +10,21 @@ public class MoverManager : MonoBehaviour
 
     private void Start()
     {
-        foreach (CarMove car in cars)
+        for (int i = 0; i < cars.Count; i++)
         {
-            Register(car, 0.5f);
+            cars[i].Initialize(this, 0.5f);
         }
     }
 
     public void Register(CarMove car, float speed)
     {
         car.Initialize(this, speed);
-        cars.Add(car);
-    }
 
+        if (!cars.Contains(car))
+        {
+            cars.Add(car);
+        }
+    }
     private void Update()
     {
         float deltaTime = Time.deltaTime;
@@ -36,7 +39,6 @@ public class MoverManager : MonoBehaviour
     {
         float newDistance = car.Distance + car.Speed * deltaTime;
 
-        // Loop spline
         float splineLength = splineComputer.CalculateLength();
         if (newDistance > splineLength)
         {

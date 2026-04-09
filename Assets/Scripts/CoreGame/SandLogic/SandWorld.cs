@@ -24,7 +24,6 @@ public class SandWorld : MonoBehaviour
 
     private SandSimulation sand;
     private PixelDrawer drawer;
-    private PixelCollider pixelCollider;
     public PixelDrawer Drawer => drawer;
 
     public Color32 CurrentColor32
@@ -45,17 +44,14 @@ public class SandWorld : MonoBehaviour
             pixelHeight * pixelSize,
             1f
         );
-
         sand = new SandSimulation(canvas);
         drawer = new PixelDrawer(canvas);
-        pixelCollider = new PixelCollider(canvas, pixelSize);
     }
 
     void Update()
     {
         RunSimulation();
         canvas.Apply();
-        pixelCollider.Build(worldCollider);
     }
 
     void RunSimulation()
@@ -68,5 +64,17 @@ public class SandWorld : MonoBehaviour
             sand.Step();
             timer -= stepTime;
         }
+    }
+    public Vector2Int WorldToPixel(Vector3 worldPos)
+    {
+        Vector3 local = canvas.RenderTarget.transform.InverseTransformPoint(worldPos);
+
+        float u = local.x + 0.5f;
+        float v = local.y + 0.5f;
+
+        int x = (int)(u * canvas.Width);
+        int y = (int)(v * canvas.Height);
+
+        return new Vector2Int(x, y);
     }
 }
