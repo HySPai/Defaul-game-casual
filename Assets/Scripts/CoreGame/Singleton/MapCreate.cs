@@ -1,7 +1,7 @@
 ﻿using Sirenix.OdinInspector;
 using UnityEngine;
 
-public class MapController : SingletonMonoBehaviour<MapController>
+public class MapCreate : SingletonMonoBehaviour<MapCreate>
 {
     [SerializeField] private Transform mapPrent;
     [SerializeField] private EnumMatrixData matrixData;
@@ -10,7 +10,7 @@ public class MapController : SingletonMonoBehaviour<MapController>
     [Header("Grid Setting")]
     [SerializeField] private float cellHeight;
     [SerializeField] private float wallHeight;
-
+    public static Cell[,] Grid;
     private Transform groundParent;
     private Transform wallParent;
     private Transform carParent;
@@ -31,6 +31,8 @@ public class MapController : SingletonMonoBehaviour<MapController>
         int rows = matrix.GetLength(0);
         int cols = matrix.GetLength(1);
 
+        Grid = new Cell[rows, cols];
+
         for (int r = 0; r < rows; r++)
         {
             for (int c = 0; c < cols; c++)
@@ -46,20 +48,33 @@ public class MapController : SingletonMonoBehaviour<MapController>
 
                 if (cell.type.HasFlag(CellType.Wall))
                 {
-                    Instantiate(prefabSO.wallPre, pos, Quaternion.identity, wallParent);
+                    var wall = Instantiate(prefabSO.wallPre, pos, Quaternion.identity, wallParent);
+                    wall.CellType = CellType.Wall;
+                    wall.Row = r;
+                    wall.Col = c;
+                    Grid[r, c] = wall;
                 }
-
                 if (cell.type.HasFlag(CellType.Car))
                 {
                     Transform parent = GetCarColorParent(cell.carColor);
 
-                    var car = Instantiate(prefabSO.carPre, pos, Quaternion.identity, parent);
+                    var carObj = Instantiate(prefabSO.carPre, pos, Quaternion.identity, parent);
+                    var carController = carObj.GetComponent<CarController>();
 
-                    var carController = car.GetComponent<CarController>();
                     if (carController != null)
                     {
-                        Color color = matrixData.ColorConfig.GetColor(cell.carColor);
                         carController.Init(cell.carColor);
+
+                        var carCell = carController.Cell;
+
+                        carCell.CellType = CellType.Car;
+
+                        carCell.Row = r;
+                        carCell.Col = c;
+
+                        Grid[r, c] = carCell;
+
+                        MapMoverManager.Instance.Cars.Add(carController);
                     }
                 }
             }
@@ -100,6 +115,10 @@ public class MapController : SingletonMonoBehaviour<MapController>
 
         return colorParent;
     }
+    public Vector3 GetCellWorldPosition(int r, int c)
+    {
+        return GetWorldPos(r, c);
+    }
     private Vector3 GetWorldPos(int r, int c)
     {
         var matrix = matrixData.Matrix;
@@ -121,5 +140,6 @@ public class MapController : SingletonMonoBehaviour<MapController>
         {
             DestroyImmediate(mapPrent.GetChild(i).gameObject);
         }
+        MapMoverManager.Instance.Cars.Clear();
     }
 }

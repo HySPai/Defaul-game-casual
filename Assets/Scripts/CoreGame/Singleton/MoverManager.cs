@@ -2,7 +2,7 @@
 using Dreamteck.Splines;
 using UnityEngine;
 
-public class MoverManager : MonoBehaviour
+public class MoverManager : SingletonMonoBehaviour<MoverManager>
 {
     [SerializeField] private SplineComputer splineComputer;
 
@@ -12,7 +12,7 @@ public class MoverManager : MonoBehaviour
     {
         for (int i = 0; i < cars.Count; i++)
         {
-            cars[i].CarMove.Initialize(this, splineComputer, 0.5f);
+            cars[i].CarMove.Initialize(this, splineComputer, 0.8f);
         }
     }
 
@@ -23,6 +23,14 @@ public class MoverManager : MonoBehaviour
         if (!cars.Contains(car))
         {
             cars.Add(car);
+        }
+    }
+
+    public void Unregister(CarController car)
+    {
+        if (cars.Contains(car))
+        {
+            cars.Remove(car);
         }
     }
 

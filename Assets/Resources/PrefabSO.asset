@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: PrefabSO
   m_EditorClassIdentifier: Assembly-CSharp::PrefabSO
   carPre: {fileID: 325034577862350380, guid: f64e7547ba52a7a438d8e3c054adcedb, type: 3}
-  wallPre: {fileID: 3200787529014093426, guid: 69cc4f7f9d81c774a98ce901b704567b, type: 3}
-  ground: {fileID: 3200787529014093426, guid: 74c1df235fa089145a9c0e452b78535f, type: 3}
+  wallPre: {fileID: -1656312823264489779, guid: 69cc4f7f9d81c774a98ce901b704567b, type: 3}
+  ground: {fileID: -2182125578946014197, guid: 74c1df235fa089145a9c0e452b78535f, type: 3}

@@ -18,6 +18,6 @@ public class PrefabSO : ScriptableObject
     }
 
     public GameObject carPre;
-    public GameObject wallPre;
-    public GameObject ground;
+    public Cell wallPre;
+    public Cell ground;
 }
