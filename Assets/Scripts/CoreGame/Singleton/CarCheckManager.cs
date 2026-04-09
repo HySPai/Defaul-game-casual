@@ -20,19 +20,21 @@ public class CarCheckManager : MonoBehaviour
         }
     }
 
-    void HandleCar(CarMove car)
+    void HandleCar(CarController car)
     {
         var canvas = world.canvas;
 
+        var carCheck = car.CarCheck;
+
         // màu cần check
-        Color color = world.colorDatabase.GetColor(car.CarCheck.colorName);
+        Color color = world.colorDatabase.GetColor(carCheck.colorName);
         Color32 targetColor = (Color32)color;
 
         // vị trí xe → pixel
         Vector2Int pixelPos = world.WorldToPixel(car.transform.position);
 
         int centerX = pixelPos.x;
-        int radius = car.CarCheck.radiusCheck;
+        int radius = carCheck.radiusCheck;
 
         int r2 = radius * radius;
 

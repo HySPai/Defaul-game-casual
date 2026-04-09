@@ -6,25 +6,26 @@ public class MoverManager : MonoBehaviour
 {
     [SerializeField] private SplineComputer splineComputer;
 
-    public List<CarMove> cars = new List<CarMove>();
+    public List<CarController> cars = new List<CarController>();
 
     private void Start()
     {
         for (int i = 0; i < cars.Count; i++)
         {
-            cars[i].Initialize(this, 0.5f);
+            cars[i].CarMove.Initialize(this, splineComputer, 0.5f);
         }
     }
 
-    public void Register(CarMove car, float speed)
+    public void Register(CarController car, SplineComputer splineComputer, float speed)
     {
-        car.Initialize(this, speed);
+        car.CarMove.Initialize(this, splineComputer, speed);
 
         if (!cars.Contains(car))
         {
             cars.Add(car);
         }
     }
+
     private void Update()
     {
         float deltaTime = Time.deltaTime;
@@ -35,9 +36,9 @@ public class MoverManager : MonoBehaviour
         }
     }
 
-    private void MoveCar(CarMove car, float deltaTime)
+    private void MoveCar(CarController car, float deltaTime)
     {
-        float newDistance = car.Distance + car.Speed * deltaTime;
+        float newDistance = car.CarMove.Distance + car.CarMove.Speed * deltaTime;
 
         float splineLength = splineComputer.CalculateLength();
         if (newDistance > splineLength)
@@ -45,6 +46,6 @@ public class MoverManager : MonoBehaviour
             newDistance %= splineLength;
         }
 
-        car.SetDistance(newDistance);
+        car.CarMove.SetDistance(newDistance);
     }
 }

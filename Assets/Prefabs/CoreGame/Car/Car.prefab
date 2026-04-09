@@ -11,10 +11,12 @@ GameObject:
   - component: {fileID: 949633197630639631}
   - component: {fileID: 3578347713776217446}
   - component: {fileID: 651431305382375242}
-  - component: {fileID: 6340876477369359179}
   - component: {fileID: 6169934890575691286}
+  - component: {fileID: 3334360851260829979}
   - component: {fileID: 5607888294326342403}
   - component: {fileID: 5623188076642679258}
+  - component: {fileID: 5274621464312124892}
+  - component: {fileID: 8904074225978487090}
   m_Layer: 0
   m_Name: Car
   m_TagString: Untagged
@@ -36,7 +38,7 @@ Transform:
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!33 &3578347713776217446
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -94,27 +96,6 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &6340876477369359179
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 325034577862350380}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &6169934890575691286
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -214,6 +195,22 @@ MonoBehaviour:
   _followTargetDirection: -1
   _position: 0
   _mode: 0
+--- !u!114 &3334360851260829979
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 325034577862350380}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac9c566f6d24c144982a44ad327ae474, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CarController
+  carMove: {fileID: 5607888294326342403}
+  carCheck: {fileID: 5623188076642679258}
+  carVisual: {fileID: 5274621464312124892}
+  colorConfig: {fileID: 11400000, guid: 6c86cc5e9b1bbe841907e8b4ca63052d, type: 2}
 --- !u!114 &5607888294326342403
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -242,3 +239,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CarCheck
   colorName: 1
   radiusCheck: 6
+--- !u!114 &5274621464312124892
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 325034577862350380}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c26c07c9263269a4998566b9312900eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CarVisual
+  ren: {fileID: 651431305382375242}
+--- !u!114 &8904074225978487090
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 325034577862350380}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62b835a1b22077e4dade19503e2fe074, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Cell
+  cellType: 2
