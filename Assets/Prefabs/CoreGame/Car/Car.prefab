@@ -231,6 +231,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CarController
   carMove: {fileID: 5607888294326342403}
+  carMoveCell: {fileID: 1193822142008625548}
   carCheck: {fileID: 5623188076642679258}
   carVisual: {fileID: 5274621464312124892}
   colorConfig: {fileID: 11400000, guid: 6c86cc5e9b1bbe841907e8b4ca63052d, type: 2}

@@ -3,7 +3,7 @@
 public class CarCheckManager : MonoBehaviour
 {
     [SerializeField] private SandWorld world;
-    [SerializeField] private MoverManager moverManager;
+    [SerializeField] private MoverSplineManager moverManager;
 
     private void Update()
     {

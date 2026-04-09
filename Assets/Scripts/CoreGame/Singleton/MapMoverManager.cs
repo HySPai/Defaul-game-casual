@@ -23,6 +23,7 @@ public class PathNode
 public class MapMoverManager : SingletonMonoBehaviour<MapMoverManager>
 {
     [SerializeField] private float moveSpeed;
+    [SerializeField] private float rotateSpeed;
 
     [SerializeField] private List<CarController> cars = new List<CarController>();
 
@@ -40,7 +41,15 @@ public class MapMoverManager : SingletonMonoBehaviour<MapMoverManager>
         new Vector2Int(-1, 0),  // left
         new Vector2Int(1, 0),   // right
     };
+    float GetRotationY(Vector2Int dir)
+    {
+        if (dir == new Vector2Int(1, 0)) return 90f;
+        if (dir == new Vector2Int(-1, 0)) return -90f;
+        if (dir == new Vector2Int(0, 1)) return 180f;
+        if (dir == new Vector2Int(0, -1)) return 0;
 
+        return 0f;
+    }
     public void CheckCar(CarController car)
     {
         if (car.IsMoving) return;
@@ -142,26 +151,39 @@ public class MapMoverManager : SingletonMonoBehaviour<MapMoverManager>
         for (int i = 1; i < path.Count; i++)
         {
             var step = path[i];
+            var prev = path[i - 1];
 
             Vector3 worldPos = MapCreate.Instance.GetCellWorldPosition(step.x, step.y);
 
-            seq.Append(
-                car.transform.DOMove(worldPos, 0.2f)
-                    .SetSpeedBased(true)
-                    .SetEase(Ease.Linear)
-                    .OnStart(() =>
-                    {
-                        // clear cell cũ
-                        MapCreate.Grid[car.Cell.Row, car.Cell.Col] = null;
-                    })
-                    .OnComplete(() =>
-                    {
-                        // update cell mới
-                        car.Cell.Row = step.x;
-                        car.Cell.Col = step.y;
+            // tính direction
+            Vector2Int dir = new Vector2Int(step.x - prev.x, step.y - prev.y);
 
-                        MapCreate.Grid[step.x, step.y] = car.Cell;
-                    })
+            float targetY = GetRotationY(dir);
+
+            Tween moveTween = car.transform
+                .DOMove(worldPos, moveSpeed)
+                .SetSpeedBased(true)
+                .SetEase(Ease.Linear)
+                .OnStart(() =>
+                {
+                    MapCreate.Grid[car.Cell.Row, car.Cell.Col] = null;
+                })
+                .OnComplete(() =>
+                {
+                    car.Cell.Row = step.x;
+                    car.Cell.Col = step.y;
+
+                    MapCreate.Grid[step.x, step.y] = car.Cell;
+                });
+
+            Tween rotateTween = car.transform
+                .DORotate(new Vector3(0, targetY, 0), rotateSpeed);
+
+            // chạy cùng lúc
+            seq.Append(
+                DOTween.Sequence()
+                    .Join(moveTween)
+                    .Join(rotateTween)
             );
         }
 
@@ -181,13 +203,11 @@ public class MapMoverManager : SingletonMonoBehaviour<MapMoverManager>
             // clear grid
             MapCreate.Grid[r, c] = null;
 
-            // remove khỏi manager
             cars.Remove(car);
 
-            // ẩn xe (hoặc destroy)
-            car.gameObject.SetActive(false);
+            MoverSplineManager.Instance.Register(car, MoverSplineManager.Instance.SplineComputer, 0.8f);
 
-            Debug.Log("Car exited!");
+            Debug.Log("Ngon luôn!");
         }
 
         car.IsMoving = false;

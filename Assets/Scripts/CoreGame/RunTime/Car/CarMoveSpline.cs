@@ -7,8 +7,8 @@ public class CarMoveSpline : MonoBehaviour
 
     public float Speed { get; private set; }
     public float Distance { get; set; }
-
-    public void Initialize(MoverManager moverManager, SplineComputer splineComputer, float speed)
+    public float TargetDistance { get; set; }
+    public void Initialize(MoverSplineManager moverManager, SplineComputer splineComputer, float speed)
     {
         positioner.spline = splineComputer;
         positioner.mode = SplinePositioner.Mode.Distance;

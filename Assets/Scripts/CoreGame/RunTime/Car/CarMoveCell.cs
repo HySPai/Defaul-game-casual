@@ -4,9 +4,9 @@ public class CarMoveCell : MonoBehaviour
 {
     private CarController carController;
 
-    private void Awake()
+    public void Init(CarController controller)
     {
-        carController = GetComponent<CarController>();
+        carController = controller;
     }
 
     private void OnMouseDown()
