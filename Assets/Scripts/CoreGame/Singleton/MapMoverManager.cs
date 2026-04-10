@@ -54,10 +54,25 @@ public class MapMoverManager : SingletonMonoBehaviour<MapMoverManager>
     {
         if (car.IsMoving) return;
 
+        // spline full → chặn luôn
+        if (!MoverSplineManager.Instance.HasAvailableSlot())
+        {
+            car.CarMoveCell.SetInteract(false);
+            Debug.Log("Spline Full!");
+            return;
+        }
+
+        // reserve slot NGAY khi click
+        MoverSplineManager.Instance.ReserveSlot();
+
+        car.IsMoving = true;
+
         var path = FindPath(car);
 
         if (path == null)
         {
+            car.IsMoving = false;
+            MoverSplineManager.Instance.ConsumeReservedSlot();
             Debug.Log("No Path");
             return;
         }
@@ -145,6 +160,7 @@ public class MapMoverManager : SingletonMonoBehaviour<MapMoverManager>
         if (path == null || path.Count == 0) return;
 
         car.IsMoving = true;
+        car.CarMoveCell.SetInteract(false);
 
         Sequence seq = DOTween.Sequence();
 

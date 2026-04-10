@@ -261,6 +261,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 228ead0fc4c227249ac6b09faabfb9a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CarMoveCell
+  canInteract: 1
 --- !u!114 &5623188076642679258
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -274,7 +275,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CarCheck
   colorName: 1
-  radiusCheck: 6
+  radiusCheck: 12
 --- !u!114 &5274621464312124892
 MonoBehaviour:
   m_ObjectHideFlags: 0

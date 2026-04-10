@@ -26,11 +26,11 @@ MonoBehaviour:
   - type: 1
     carColor: 0
   - type: 2
-    carColor: 1
+    carColor: 0
   - type: 2
-    carColor: 1
+    carColor: 5
   - type: 2
-    carColor: 3
+    carColor: 5
   - type: 2
     carColor: 4
   - type: 1
@@ -46,11 +46,11 @@ MonoBehaviour:
   - type: 1
     carColor: 0
   - type: 2
-    carColor: 1
+    carColor: 12
   - type: 2
     carColor: 1
   - type: 2
-    carColor: 10
+    carColor: 9
   - type: 2
     carColor: 4
   - type: 1
