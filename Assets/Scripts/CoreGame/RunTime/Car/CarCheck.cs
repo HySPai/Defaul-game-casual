@@ -4,9 +4,13 @@ public class CarCheck : MonoBehaviour
 {
     public ColorName colorName;
 
-    public int radiusCheck = 2;
+    public int radiusCheck;
 
-    public int progressPercent; // 0 → 100
+    [SerializeField] private int progressPercent;
 
-    [HideInInspector] public int totalPixel;
+    public int ProgressPercent
+    {
+        get => progressPercent;
+        set => progressPercent = Mathf.Clamp(value, 0, 100);
+    }
 }
