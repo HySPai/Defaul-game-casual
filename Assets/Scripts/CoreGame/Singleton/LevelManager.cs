@@ -32,11 +32,10 @@ public class LevelManager : SingletonMonoBehaviour<LevelManager>
         GameEvent.OnReplay += Replay;
     }
 
-    [SerializeField] private Transform handTutPosTransform;
     public void Play()
     {
         UIMainGameplay.Show();
-        GameViewsManager.Instance.GetView<UITutorial>().ShowHandClick(handTutPosTransform.position);
+        MapCreate.Instance.GenerateMap();
     }
 
     [Button]

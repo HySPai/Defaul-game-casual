@@ -22,6 +22,7 @@ public class MainMenuState : BaseState
             HapticController.Instance.PlayHaptic();
             this.RequestStateChange(1);
             AudioManager.Instance.PlaySfx(AudioSfxID.sfx_btn_play_click);
+            MapCreate.Instance.GenerateMap();
         });
     }
     public override int Update()
