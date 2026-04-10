@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class SandWorld : MonoBehaviour
+public class SandWorld : SingletonMonoBehaviour<SandWorld>
 {
     [Header("Canvas")]
     public PixelCanvas canvas;

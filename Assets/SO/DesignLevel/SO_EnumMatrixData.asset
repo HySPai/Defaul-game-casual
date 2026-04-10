@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fd6551dc52961146a9b768e9d51e1be, type: 3}
   m_Name: SO_EnumMatrixData
   m_EditorClassIdentifier: 
+  picture: {fileID: 2800000, guid: e0a0a5028e57f7742a2160afa5e11df9, type: 3}
   rows: 5
   cols: 5
   data:
@@ -26,33 +27,33 @@ MonoBehaviour:
   - type: 1
     carColor: 0
   - type: 2
+    carColor: 12
+  - type: 2
     carColor: 0
-  - type: 2
-    carColor: 5
-  - type: 2
-    carColor: 5
   - type: 2
     carColor: 4
-  - type: 1
-    carColor: 0
+  - type: 2
+    carColor: 5
   - type: 1
     carColor: 0
   - type: 0
     carColor: 0
   - type: 0
     carColor: 0
+  - type: 0
+    carColor: 0
   - type: 2
-    carColor: 4
+    carColor: 1
   - type: 1
     carColor: 0
   - type: 2
     carColor: 12
   - type: 2
-    carColor: 1
+    carColor: 0
   - type: 2
     carColor: 9
   - type: 2
-    carColor: 4
+    carColor: 5
   - type: 1
     carColor: 0
   - type: 1

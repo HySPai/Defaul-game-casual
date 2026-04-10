@@ -1,15 +1,12 @@
-﻿using Sirenix.OdinInspector;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class SandImage : MonoBehaviour
+public class SandImage : SingletonMonoBehaviour<SandImage>
 {
-    [SerializeField] private Texture2D picture;
-    [SerializeField] private SandWorld world;
-
-    [Button]
-    public void ApplyImage()
+    public void ApplyImage(Texture2D picture)
     {
-        if (picture == null || world == null) return;
+        if (picture == null || SandWorld.Instance == null) return;
+
+        SandWorld world = SandWorld.Instance;
 
         var canvas = world.canvas;
 

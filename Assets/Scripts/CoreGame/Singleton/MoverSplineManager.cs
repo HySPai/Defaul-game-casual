@@ -24,6 +24,15 @@ public class MoverSplineManager : SingletonMonoBehaviour<MoverSplineManager>
 
         UpdateCarPositions();
     }
+    private void Update()
+    {
+        float deltaTime = Time.deltaTime;
+
+        for (int i = 0; i < cars.Count; i++)
+        {
+            MoveCar(cars[i], deltaTime);
+        }
+    }
 
     public void Register(CarController car, SplineComputer splineComputer, float speed)
     {
@@ -102,15 +111,6 @@ public class MoverSplineManager : SingletonMonoBehaviour<MoverSplineManager>
             float targetDistance = i * spacing;
 
             cars[i].CarMove.SetDistance(targetDistance);
-        }
-    }
-    private void Update()
-    {
-        float deltaTime = Time.deltaTime;
-
-        for (int i = 0; i < cars.Count; i++)
-        {
-            MoveCar(cars[i], deltaTime);
         }
     }
 

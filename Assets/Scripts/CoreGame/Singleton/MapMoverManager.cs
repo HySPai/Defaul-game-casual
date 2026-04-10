@@ -43,10 +43,10 @@ public class MapMoverManager : SingletonMonoBehaviour<MapMoverManager>
     };
     float GetRotationY(Vector2Int dir)
     {
-        if (dir == new Vector2Int(1, 0)) return 90f;
-        if (dir == new Vector2Int(-1, 0)) return -90f;
         if (dir == new Vector2Int(0, 1)) return 180f;
         if (dir == new Vector2Int(0, -1)) return 0;
+        if (dir == new Vector2Int(-1, 0)) return -90f;
+        if (dir == new Vector2Int(1, 0)) return 90f;
 
         return 0f;
     }
@@ -54,7 +54,6 @@ public class MapMoverManager : SingletonMonoBehaviour<MapMoverManager>
     {
         if (car.IsMoving) return;
 
-        // spline full → chặn luôn
         if (!MoverSplineManager.Instance.HasAvailableSlot())
         {
             car.CarMoveCell.SetInteract(false);

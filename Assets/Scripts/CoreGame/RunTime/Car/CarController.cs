@@ -1,5 +1,4 @@
-﻿using Dreamteck.Splines;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CarController : MonoBehaviour
 {

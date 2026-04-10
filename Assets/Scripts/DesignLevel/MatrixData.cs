@@ -13,6 +13,8 @@ public enum CellType
 [CreateAssetMenu(fileName = "SO_EnumMatrixData", menuName = "ScriptableObjects/Enum Matrix Data")]
 public class EnumMatrixData : ScriptableObject
 {
+    [SerializeField] private Texture2D picture;
+
     [SerializeField] private int rows = 5;
     [SerializeField] private int cols = 5;
 
@@ -21,6 +23,7 @@ public class EnumMatrixData : ScriptableObject
     [Header("Color Config")]
     [SerializeField] private SO_Color colorConfig; // 🔥 gán ở đây
     public SO_Color ColorConfig => colorConfig;
+    public Texture2D Picture => picture;
     // =========================
     // MATRIX API
     // =========================

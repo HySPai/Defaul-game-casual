@@ -15,17 +15,14 @@ public class MapCreate : SingletonMonoBehaviour<MapCreate>
     private Transform wallParent;
     private Transform carParent;
 
-    private void Start()
-    {
-        GenerateMap();
-    }
-
     [Button]
     public void GenerateMap()
     {
         ClearMap();
 
         SetupParents();
+
+        SandImage.Instance.ApplyImage(matrixData.Picture);
 
         var matrix = matrixData.Matrix;
         int rows = matrix.GetLength(0);
