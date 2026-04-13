@@ -41,22 +41,13 @@ public class MapMoverManager : SingletonMonoBehaviour<MapMoverManager>
         new Vector2Int(-1, 0),  // left
         new Vector2Int(1, 0),   // right
     };
-    float GetRotationY(Vector2Int dir)
-    {
-        if (dir == new Vector2Int(0, 1)) return 180f;
-        if (dir == new Vector2Int(0, -1)) return 0;
-        if (dir == new Vector2Int(-1, 0)) return -90f;
-        if (dir == new Vector2Int(1, 0)) return 90f;
 
-        return 0f;
-    }
     public void CheckCar(CarController car)
     {
         if (car.IsMoving) return;
 
         if (!MoverSplineManager.Instance.HasAvailableSlot())
         {
-            car.CarMoveCell.SetInteract(false);
             Debug.Log("Spline Full!");
             return;
         }
@@ -158,54 +149,73 @@ public class MapMoverManager : SingletonMonoBehaviour<MapMoverManager>
     {
         if (path == null || path.Count == 0) return;
 
+        if (path.Count < 2)
+        {
+            HandleCarExit(car);
+            return;
+        }
+
         car.IsMoving = true;
         car.CarMoveCell.SetInteract(false);
 
-        Sequence seq = DOTween.Sequence();
+        Vector3[] waypoints = new Vector3[path.Count];
 
-        for (int i = 1; i < path.Count; i++)
+        for (int i = 0; i < path.Count; i++)
         {
-            var step = path[i];
-            var prev = path[i - 1];
-
-            Vector3 worldPos = MapCreate.Instance.GetCellWorldPosition(step.x, step.y);
-
-            // tính direction
-            Vector2Int dir = new Vector2Int(step.x - prev.x, step.y - prev.y);
-
-            float targetY = GetRotationY(dir);
-
-            Tween moveTween = car.transform
-                .DOMove(worldPos, moveSpeed)
-                .SetSpeedBased(true)
-                .SetEase(Ease.Linear)
-                .OnStart(() =>
-                {
-                    MapCreate.Grid[car.Cell.Row, car.Cell.Col] = null;
-                })
-                .OnComplete(() =>
-                {
-                    car.Cell.Row = step.x;
-                    car.Cell.Col = step.y;
-
-                    MapCreate.Grid[step.x, step.y] = car.Cell;
-                });
-
-            Tween rotateTween = car.transform
-                .DORotate(new Vector3(0, targetY, 0), rotateSpeed);
-
-            // chạy cùng lúc
-            seq.Append(
-                DOTween.Sequence()
-                    .Join(moveTween)
-                    .Join(rotateTween)
-            );
+            var p = path[i];
+            waypoints[i] = MapCreate.Instance.GetCellWorldPosition(p.x, p.y);
         }
 
-        seq.OnComplete(() =>
+        MapCreate.Grid[car.Cell.Row, car.Cell.Col] = null;
+
+        car.transform
+            .DOPath(waypoints, moveSpeed, PathType.CatmullRom)
+            .SetSpeedBased(true)
+            .SetEase(Ease.Linear)
+            .SetLookAt(rotateSpeed)
+            .OnUpdate(() => UpdateCarCell(car))
+            .OnComplete(() =>
+            {
+                var last = path[^1];
+                car.Cell.Row = last.x;
+                car.Cell.Col = last.y;
+
+                MapCreate.Grid[last.x, last.y] = car.Cell;
+
+                HandleCarExit(car);
+            });
+    }
+    void UpdateCarCell(CarController car)
+    {
+        Vector3 pos = car.transform.position;
+
+        var grid = MapCreate.Grid;
+
+        int bestR = -1;
+        int bestC = -1;
+        float minDist = float.MaxValue;
+
+        for (int r = 0; r < grid.GetLength(0); r++)
         {
-            HandleCarExit(car);
-        });
+            for (int c = 0; c < grid.GetLength(1); c++)
+            {
+                Vector3 cellPos = MapCreate.Instance.GetCellWorldPosition(r, c);
+                float dist = (pos - cellPos).sqrMagnitude;
+
+                if (dist < minDist)
+                {
+                    minDist = dist;
+                    bestR = r;
+                    bestC = c;
+                }
+            }
+        }
+
+        if (bestR != -1)
+        {
+            car.Cell.Row = bestR;
+            car.Cell.Col = bestC;
+        }
     }
     void HandleCarExit(CarController car)
     {

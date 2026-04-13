@@ -1,24 +1,24 @@
-using UnityEngine;
-using Dreamteck.Splines;
+﻿using UnityEngine;
 
 public class CarMoveSpline : MonoBehaviour
 {
-    [SerializeField] private SplinePositioner positioner;
+    public SplinePoint Point { get; private set; }
 
-    public float Speed { get; private set; }
-    public float Distance { get; set; }
-    public float TargetDistance { get; set; }
-    public void Initialize(MoverSplineManager moverManager, SplineComputer splineComputer, float speed)
+    public void Initialize(MoverSplineManager moverManager)
     {
-        positioner.spline = splineComputer;
-        positioner.mode = SplinePositioner.Mode.Distance;
-        Speed = speed;
-        Distance = 0f;
+        // Hiện tại không cần gì thêm, giữ để mở rộng sau
     }
 
-    public void SetDistance(float distance)
+    public void AssignPoint(SplinePoint point)
     {
-        Distance = distance;
-        positioner.SetDistance(distance);
+        Point = point;
+    }
+
+    private void Update()
+    {
+        if (Point == null) return;
+
+        transform.position = Point.transform.position;
+        transform.rotation = Point.transform.rotation;
     }
 }

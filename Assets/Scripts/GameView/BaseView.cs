@@ -17,7 +17,7 @@ public class BaseView : MonoBehaviour, IView
     public virtual void Initialize(CancellationToken propagateCancellationToken)
     {
         PropagateCancellationToken(propagateCancellationToken);
-        this.gameObject.SetActive(false);
+        //this.gameObject.SetActive(false);
     }
 
     /// <summary>

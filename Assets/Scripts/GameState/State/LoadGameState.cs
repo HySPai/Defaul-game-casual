@@ -16,7 +16,7 @@ public class LoadGameState : BaseState
     {
         await base.Start();
         UILoading.Show();
-        await UniTask.Delay(3000).AttachExternalCancellation(GetCancellationTokenInState());
+        await UniTask.Delay(0).AttachExternalCancellation(GetCancellationTokenInState());
         //await UniTask.WaitUntil(() => TinySauceSDKController.Instance.isInitialized).AttachExternalCancellation(GetCancellationTokenInState());
         this.RequestStateChange(1);
     }
