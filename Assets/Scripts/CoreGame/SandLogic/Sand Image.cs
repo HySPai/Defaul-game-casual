@@ -41,12 +41,26 @@ public class SandImage : SingletonMonoBehaviour<SandImage>
                 Color32 closest = GetClosestColor(imgColor, palette);
 
                 canvas.SetPixel(x, y, closest);
+
+                ColorName colorName = GetColorNameFromColor(closest);
+                ColorProgressManager.Instance.RegisterPixel(colorName);
             }
         }
 
         canvas.Apply();
     }
+    ColorName GetColorNameFromColor(Color32 color)
+    {
+        var colors = SandWorld.Instance.colorDatabase.GetAllColors();
 
+        for (int i = 0; i < colors.Length; i++)
+        {
+            if (((Color32)colors[i]).Equals(color))
+                return (ColorName)i;
+        }
+
+        return default;
+    }
     Color32[] ConvertPalette(Color[] colors)
     {
         Color32[] result = new Color32[colors.Length];

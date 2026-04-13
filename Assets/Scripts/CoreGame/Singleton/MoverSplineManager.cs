@@ -5,62 +5,13 @@ using UnityEngine;
 public class MoverSplineManager : SingletonMonoBehaviour<MoverSplineManager>
 {
     [SerializeField] private int maxCars = 5;
-
+    [SerializeField] private float speed;
     [SerializeField] private SplineComputer splineComputer;
 
     public List<CarController> cars = new List<CarController>();
-    public SplineComputer SplineComputer => splineComputer;
-    private float spacing;
+
     private int reservedSlots = 0;
-    private void Start()
-    {
-        float splineLength = splineComputer.CalculateLength();
-        spacing = splineLength / maxCars;
 
-        for (int i = 0; i < cars.Count; i++)
-        {
-            cars[i].CarMove.Initialize(this, splineComputer, 0.8f);
-        }
-
-        UpdateCarPositions();
-    }
-    private void Update()
-    {
-        float deltaTime = Time.deltaTime;
-
-        for (int i = 0; i < cars.Count; i++)
-        {
-            MoveCar(cars[i], deltaTime);
-        }
-    }
-
-    public void Register(CarController car, SplineComputer splineComputer, float speed)
-    {
-        ConsumeReservedSlot();
-
-        if (cars.Count >= maxCars)
-        {
-            Debug.Log("Max cars reached!");
-            return;
-        }
-
-        car.CarMove.Initialize(this, splineComputer, speed);
-
-        if (!cars.Contains(car))
-        {
-            cars.Add(car);
-        }
-
-        PlaceNewCar(car);
-    }
-    public void Unregister(CarController car)
-    {
-        if (cars.Contains(car))
-        {
-            cars.Remove(car);
-            UpdateCarPositions();
-        }
-    }
     public bool HasAvailableSlot()
     {
         return (cars.Count + reservedSlots) < maxCars;
@@ -75,42 +26,44 @@ public class MoverSplineManager : SingletonMonoBehaviour<MoverSplineManager>
     {
         reservedSlots = Mathf.Max(0, reservedSlots - 1);
     }
-    void PlaceNewCar(CarController car)
-    {
-        float splineLength = splineComputer.CalculateLength();
 
-        if (cars.Count == 1)
+    public void Register(CarController car)
+    {
+        ConsumeReservedSlot();
+
+        if (cars.Contains(car)) return;
+
+        if (cars.Count >= maxCars)
         {
-            // xe đầu tiên → đặt ở 0
-            car.CarMove.SetDistance(0f);
+            Debug.Log("Spline full!");
             return;
         }
 
-        // lấy xe đứng cuối (xe trước nó trong list)
-        var lastCar = cars[cars.Count - 2];
+        cars.Add(car);
 
-        float spacing = splineLength / maxCars; // hoặc fixed spacing nếu bạn muốn
+        car.CarMove.Initialize(this, splineComputer, speed);
 
-        float targetDistance = lastCar.CarMove.Distance - spacing;
-
-        // handle loop âm
-        if (targetDistance < 0)
-        {
-            targetDistance += splineLength;
-        }
-
-        car.CarMove.SetDistance(targetDistance);
+        PlaceCarAtEnd(car);
     }
-    void UpdateCarPositions()
+
+    public void Unregister(CarController car)
     {
-        float splineLength = splineComputer.CalculateLength();
-        spacing = splineLength / maxCars;
+        if (!cars.Contains(car)) return;
+
+        cars.Remove(car);
+
+        car.gameObject.SetActive(false);
+
+        Debug.Log("Car unregistered from spline." + car.name);
+    }
+
+    private void Update()
+    {
+        float deltaTime = Time.deltaTime;
 
         for (int i = 0; i < cars.Count; i++)
         {
-            float targetDistance = i * spacing;
-
-            cars[i].CarMove.SetDistance(targetDistance);
+            MoveCar(cars[i], deltaTime);
         }
     }
 
@@ -119,11 +72,34 @@ public class MoverSplineManager : SingletonMonoBehaviour<MoverSplineManager>
         float newDistance = car.CarMove.Distance + car.CarMove.Speed * deltaTime;
 
         float splineLength = splineComputer.CalculateLength();
+
         if (newDistance > splineLength)
         {
             newDistance %= splineLength;
         }
 
         car.CarMove.SetDistance(newDistance);
+    }
+
+    void PlaceCarAtEnd(CarController car)
+    {
+        float splineLength = splineComputer.CalculateLength();
+
+        if (cars.Count == 1)
+        {
+            car.CarMove.SetDistance(0f);
+            return;
+        }
+
+        var lastCar = cars[cars.Count - 2];
+
+        float spacing = splineLength / maxCars;
+
+        float targetDistance = lastCar.CarMove.Distance - spacing;
+
+        if (targetDistance < 0)
+            targetDistance += splineLength;
+
+        car.CarMove.SetDistance(targetDistance);
     }
 }

@@ -72,6 +72,7 @@ public class MapCreate : SingletonMonoBehaviour<MapCreate>
                         Grid[r, c] = carCell;
 
                         MapMoverManager.Instance.Cars.Add(carController);
+                        ColorProgressManager.Instance.RegisterCar(cell.carColor);
                     }
                 }
             }

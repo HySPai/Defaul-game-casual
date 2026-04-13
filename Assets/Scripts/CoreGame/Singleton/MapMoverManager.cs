@@ -220,7 +220,7 @@ public class MapMoverManager : SingletonMonoBehaviour<MapMoverManager>
 
             cars.Remove(car);
 
-            MoverSplineManager.Instance.Register(car, MoverSplineManager.Instance.SplineComputer, 0.8f);
+            MoverSplineManager.Instance.Register(car);
 
             Debug.Log("Ngon luôn!");
         }
