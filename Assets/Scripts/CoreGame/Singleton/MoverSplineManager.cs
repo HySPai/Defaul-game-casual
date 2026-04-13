@@ -10,7 +10,7 @@ public class MoverSplineManager : SingletonMonoBehaviour<MoverSplineManager>
     [SerializeField] private GameObject pointPrefab;
 
     public List<CarController> cars = new List<CarController>();
-
+    public float SplineLength => splineLength;
     private List<SplinePoint> points = new List<SplinePoint>();
     private HashSet<SplinePoint> occupiedPoints = new HashSet<SplinePoint>();
 
@@ -33,9 +33,6 @@ public class MoverSplineManager : SingletonMonoBehaviour<MoverSplineManager>
         }
     }
 
-    // =========================
-    // CREATE POINTS
-    // =========================
     void CreatePoints()
     {
         float spacing = splineLength / maxCars;
@@ -46,7 +43,6 @@ public class MoverSplineManager : SingletonMonoBehaviour<MoverSplineManager>
 
             var point = go.GetComponent<SplinePoint>();
 
-            // 🔥 QUAN TRỌNG: set trước
             point.positioner.spline = splineComputer;
             point.positioner.mode = SplinePositioner.Mode.Distance;
 
@@ -67,9 +63,6 @@ public class MoverSplineManager : SingletonMonoBehaviour<MoverSplineManager>
         point.SetDistance(newDistance);
     }
 
-    // =========================
-    // SLOT SYSTEM
-    // =========================
     public bool HasAvailableSlot()
     {
         return (cars.Count + reservedSlots) < maxCars;
@@ -85,10 +78,7 @@ public class MoverSplineManager : SingletonMonoBehaviour<MoverSplineManager>
         reservedSlots = Mathf.Max(0, reservedSlots - 1);
     }
 
-    // =========================
-    // REGISTER / UNREGISTER
-    // =========================
-    public void Register(CarController car)
+    public void Register(CarController car, SplinePoint point)
     {
         ConsumeReservedSlot();
 
@@ -99,20 +89,12 @@ public class MoverSplineManager : SingletonMonoBehaviour<MoverSplineManager>
             return;
         }
 
-        var point = GetAvailablePoint();
-        if (point == null)
-        {
-            Debug.Log("No available point!");
-            return;
-        }
-
         cars.Add(car);
         occupiedPoints.Add(point);
 
         car.CarMove.Initialize(this);
         car.CarMove.AssignPoint(point);
     }
-
     public void Unregister(CarController car)
     {
         if (!cars.Contains(car)) return;
@@ -125,21 +107,24 @@ public class MoverSplineManager : SingletonMonoBehaviour<MoverSplineManager>
         cars.Remove(car);
 
         car.gameObject.SetActive(false);
-
-        Debug.Log("Car unregistered: " + car.name);
     }
 
-    // =========================
-    // POINT MANAGEMENT
-    // =========================
-    SplinePoint GetAvailablePoint()
+    public SplinePoint PeekAvailablePoint()
     {
-        for (int i = 0; i < points.Count; i++)
+        SplinePoint bestPoint = null;
+        float minDistance = float.MaxValue;
+
+        foreach (var point in points)
         {
-            if (!occupiedPoints.Contains(points[i]))
-                return points[i];
+            if (occupiedPoints.Contains(point)) continue;
+
+            if (point.Distance < minDistance)
+            {
+                minDistance = point.Distance;
+                bestPoint = point;
+            }
         }
 
-        return null;
+        return bestPoint;
     }
 }

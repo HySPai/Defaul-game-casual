@@ -148,6 +148,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9434d9e6cd640504da9360a45e640a28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CarMove
+  lerpSpeed: 10
+  rotateSpeed: 10
 --- !u!114 &1193822142008625548
 MonoBehaviour:
   m_ObjectHideFlags: 0

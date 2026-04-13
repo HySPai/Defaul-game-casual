@@ -24,6 +24,7 @@ public class MapMoverManager : SingletonMonoBehaviour<MapMoverManager>
 {
     [SerializeField] private float moveSpeed;
     [SerializeField] private float rotateSpeed;
+    [SerializeField] private PathType pathType = PathType.CatmullRom;
 
     [SerializeField] private List<CarController> cars = new List<CarController>();
 
@@ -169,7 +170,7 @@ public class MapMoverManager : SingletonMonoBehaviour<MapMoverManager>
         MapCreate.Grid[car.Cell.Row, car.Cell.Col] = null;
 
         car.transform
-            .DOPath(waypoints, moveSpeed, PathType.CatmullRom)
+            .DOPath(waypoints, moveSpeed, pathType)
             .SetSpeedBased(true)
             .SetEase(Ease.Linear)
             .SetLookAt(rotateSpeed)
@@ -219,23 +220,57 @@ public class MapMoverManager : SingletonMonoBehaviour<MapMoverManager>
     }
     void HandleCarExit(CarController car)
     {
-        // nếu đang ở col = 0 thì cho exit
         if (car.Cell.Col == 0)
         {
             int r = car.Cell.Row;
             int c = car.Cell.Col;
 
-            // clear grid
             MapCreate.Grid[r, c] = null;
-
             cars.Remove(car);
 
-            MoverSplineManager.Instance.Register(car);
-
-            Debug.Log("Ngon luôn!");
+            MoveCarToSplinePoint(car);
         }
 
         car.IsMoving = false;
+    }
+    void MoveCarToSplinePoint(CarController car)
+    {
+        var splineManager = MoverSplineManager.Instance;
+
+        var point = splineManager.PeekAvailablePoint();
+
+        if (point == null)
+        {
+            Debug.Log("No available point!");
+            splineManager.ConsumeReservedSlot();
+            return;
+        }
+
+        Vector3 startPos = car.transform.position;
+        Vector3 pointPos = point.transform.position;
+
+        // ===== tạo path kiểu L =====
+        Vector3 step1 = startPos + new Vector3(0, 0, 0.8f);
+        Vector3 step2 = new Vector3(pointPos.x, step1.y, step1.z);
+        Vector3 step3 = pointPos;
+
+        Vector3[] path = new Vector3[]
+        {
+        startPos,
+        step1,
+        step2,
+        step3
+        };
+
+        car.transform
+            .DOPath(path, moveSpeed, pathType)
+            .SetSpeedBased(true)
+            .SetEase(Ease.Linear)
+            .SetLookAt(rotateSpeed)
+            .OnComplete(() =>
+            {
+                splineManager.Register(car, point);
+            });
     }
     public Vector3 GetWorldPos(int r, int c)
     {
