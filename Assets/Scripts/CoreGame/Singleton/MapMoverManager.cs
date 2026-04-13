@@ -47,14 +47,21 @@ public class MapMoverManager : SingletonMonoBehaviour<MapMoverManager>
     {
         if (car.IsMoving) return;
 
-        if (!MoverSplineManager.Instance.HasAvailableSlot())
+        var splineManager = MoverSplineManager.Instance;
+
+        if (!splineManager.HasAvailableSlot())
         {
             Debug.Log("Spline Full!");
             return;
         }
 
-        // reserve slot NGAY khi click
-        MoverSplineManager.Instance.ReserveSlot();
+        var reservedPoint = splineManager.ReservePoint();
+
+        if (reservedPoint == null)
+        {
+            Debug.Log("No available point!");
+            return;
+        }
 
         car.IsMoving = true;
 
@@ -63,12 +70,15 @@ public class MapMoverManager : SingletonMonoBehaviour<MapMoverManager>
         if (path == null)
         {
             car.IsMoving = false;
-            MoverSplineManager.Instance.ConsumeReservedSlot();
+
+            splineManager.ReleaseReservedPoint(reservedPoint);
+
             Debug.Log("No Path");
             return;
         }
 
-        MoveCar(car, path);
+        // 🔥 truyền point xuống dưới
+        MoveCar(car, path, reservedPoint);
     }
     List<Vector2Int> FindPath(CarController car)
     {
@@ -146,13 +156,13 @@ public class MapMoverManager : SingletonMonoBehaviour<MapMoverManager>
         path.Reverse();
         return path;
     }
-    void MoveCar(CarController car, List<Vector2Int> path)
+    void MoveCar(CarController car, List<Vector2Int> path, SplinePoint reservedPoint)
     {
         if (path == null || path.Count == 0) return;
 
         if (path.Count < 2)
         {
-            HandleCarExit(car);
+            HandleCarExit(car, reservedPoint);
             return;
         }
 
@@ -183,7 +193,7 @@ public class MapMoverManager : SingletonMonoBehaviour<MapMoverManager>
 
                 MapCreate.Grid[last.x, last.y] = car.Cell;
 
-                HandleCarExit(car);
+                HandleCarExit(car, reservedPoint);
             });
     }
     void UpdateCarCell(CarController car)
@@ -218,7 +228,7 @@ public class MapMoverManager : SingletonMonoBehaviour<MapMoverManager>
             car.Cell.Col = bestC;
         }
     }
-    void HandleCarExit(CarController car)
+    void HandleCarExit(CarController car, SplinePoint reservedPoint)
     {
         if (car.Cell.Col == 0)
         {
@@ -228,16 +238,14 @@ public class MapMoverManager : SingletonMonoBehaviour<MapMoverManager>
             MapCreate.Grid[r, c] = null;
             cars.Remove(car);
 
-            MoveCarToSplinePoint(car);
+            MoveCarToSplinePoint(car, reservedPoint);
         }
 
         car.IsMoving = false;
     }
-    void MoveCarToSplinePoint(CarController car)
+    void MoveCarToSplinePoint(CarController car, SplinePoint point)
     {
         var splineManager = MoverSplineManager.Instance;
-
-        var point = splineManager.PeekAvailablePoint();
 
         if (point == null)
         {
@@ -249,7 +257,6 @@ public class MapMoverManager : SingletonMonoBehaviour<MapMoverManager>
         Vector3 startPos = car.transform.position;
         Vector3 pointPos = point.transform.position;
 
-        // ===== tạo path kiểu L =====
         Vector3 step1 = startPos + new Vector3(0, 0, 0.8f);
         Vector3 step2 = new Vector3(pointPos.x, step1.y, step1.z);
         Vector3 step3 = pointPos;
@@ -272,6 +279,7 @@ public class MapMoverManager : SingletonMonoBehaviour<MapMoverManager>
                 splineManager.Register(car, point);
             });
     }
+
     public Vector3 GetWorldPos(int r, int c)
     {
         return MapCreate.Instance.GetCellWorldPosition(r, c);

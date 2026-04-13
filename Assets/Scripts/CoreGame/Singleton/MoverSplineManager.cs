@@ -14,9 +14,11 @@ public class MoverSplineManager : SingletonMonoBehaviour<MoverSplineManager>
     private List<SplinePoint> points = new List<SplinePoint>();
     private HashSet<SplinePoint> occupiedPoints = new HashSet<SplinePoint>();
 
-    private int reservedSlots = 0;
+    public int reservedSlots = 0;
     private float splineLength;
+    private HashSet<SplinePoint> reservedPoints = new HashSet<SplinePoint>();
 
+    #region Unity Methods
     private void Start()
     {
         splineLength = splineComputer.CalculateLength();
@@ -32,7 +34,45 @@ public class MoverSplineManager : SingletonMonoBehaviour<MoverSplineManager>
             MovePoint(points[i], deltaTime);
         }
     }
+    #endregion
 
+    #region Register & Unregister
+
+    public void Register(CarController car, SplinePoint point)
+    {
+        ConsumeReservedSlot();
+
+        if (cars.Contains(car)) return;
+        if (cars.Count >= maxCars)
+        {
+            Debug.Log("Spline full!");
+            return;
+        }
+
+        reservedPoints.Remove(point);
+
+        cars.Add(car);
+        occupiedPoints.Add(point);
+
+        car.CarMove.Initialize(this);
+        car.CarMove.AssignPoint(point);
+    }
+    public void Unregister(CarController car)
+    {
+        if (!cars.Contains(car)) return;
+
+        var point = car.CarMove.Point;
+
+        if (point != null)
+            occupiedPoints.Remove(point);
+
+        cars.Remove(car);
+
+        car.gameObject.SetActive(false);
+    }
+    #endregion
+
+    #region Points Creation & Movement
     void CreatePoints()
     {
         float spacing = splineLength / maxCars;
@@ -62,7 +102,9 @@ public class MoverSplineManager : SingletonMonoBehaviour<MoverSplineManager>
 
         point.SetDistance(newDistance);
     }
+    #endregion
 
+    #region Slots
     public bool HasAvailableSlot()
     {
         return (cars.Count + reservedSlots) < maxCars;
@@ -77,38 +119,33 @@ public class MoverSplineManager : SingletonMonoBehaviour<MoverSplineManager>
     {
         reservedSlots = Mathf.Max(0, reservedSlots - 1);
     }
+    #endregion
 
-    public void Register(CarController car, SplinePoint point)
+    #region Points
+
+
+    public SplinePoint ReservePoint()
     {
-        ConsumeReservedSlot();
-
-        if (cars.Contains(car)) return;
-        if (cars.Count >= maxCars)
-        {
-            Debug.Log("Spline full!");
-            return;
-        }
-
-        cars.Add(car);
-        occupiedPoints.Add(point);
-
-        car.CarMove.Initialize(this);
-        car.CarMove.AssignPoint(point);
-    }
-    public void Unregister(CarController car)
-    {
-        if (!cars.Contains(car)) return;
-
-        var point = car.CarMove.Point;
+        var point = PeekAvailablePoint();
 
         if (point != null)
-            occupiedPoints.Remove(point);
+        {
+            reservedPoints.Add(point);
+            ReserveSlot();
+        }
 
-        cars.Remove(car);
-
-        car.gameObject.SetActive(false);
+        return point;
     }
+    public void ReleaseReservedPoint(SplinePoint point)
+    {
+        if (point == null) return;
 
+        if (reservedPoints.Contains(point))
+        {
+            reservedPoints.Remove(point);
+            ConsumeReservedSlot();
+        }
+    }
     public SplinePoint PeekAvailablePoint()
     {
         SplinePoint bestPoint = null;
@@ -117,6 +154,7 @@ public class MoverSplineManager : SingletonMonoBehaviour<MoverSplineManager>
         foreach (var point in points)
         {
             if (occupiedPoints.Contains(point)) continue;
+            if (reservedPoints.Contains(point)) continue;
 
             if (point.Distance < minDistance)
             {
@@ -127,4 +165,5 @@ public class MoverSplineManager : SingletonMonoBehaviour<MoverSplineManager>
 
         return bestPoint;
     }
+    #endregion
 }

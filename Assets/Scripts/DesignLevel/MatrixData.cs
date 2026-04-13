@@ -9,6 +9,7 @@ public enum CellType
     Wall = 1 << 0,
     Car = 1 << 1,
     Ground = 1 << 2,
+    Tunnel = 1 << 3,
 }
 [CreateAssetMenu(fileName = "SO_EnumMatrixData", menuName = "ScriptableObjects/Enum Matrix Data")]
 public class EnumMatrixData : ScriptableObject
@@ -87,10 +88,11 @@ public class EnumMatrixData : ScriptableObject
 
     [ShowInInspector, DoNotDrawAsReference]
     [TableMatrix(
-        HorizontalTitle = "Map",
-        DrawElementMethod = nameof(DrawCell),
-        ResizableColumns = false,
-        RowHeight = 40)]
+    HorizontalTitle = "Map",
+    DrawElementMethod = nameof(DrawCell),
+    ResizableColumns = false,
+    RowHeight = 40,
+    SquareCells = true)]
     private CellData[,] Table
     {
         get => Matrix;
@@ -106,16 +108,18 @@ public class EnumMatrixData : ScriptableObject
 #if UNITY_EDITOR
         Event e = Event.current;
 
-        float half = rect.height * 0.5f;
+        float h = rect.height / 3f;
 
-        Rect typeRect = new Rect(rect.x, rect.y, rect.width, half);
-        Rect colorRect = new Rect(rect.x, rect.y + half, rect.width, half);
+        Rect typeRect = new Rect(rect.x, rect.y, rect.width, h);
+        Rect colorRect = new Rect(rect.x, rect.y + h, rect.width, h);
+        Rect tunnelRect = new Rect(rect.x, rect.y + h * 2, rect.width, h);
 
-        // ===== CLICK TO TOGGLE (ONLY OUTSIDE FIELDS) =====
+        // ===== CLICK TO TOGGLE =====
         if (e.type == EventType.MouseDown && rect.Contains(e.mousePosition))
         {
-            // nếu click vào vùng dropdown thì KHÔNG xử lý
-            if (!typeRect.Contains(e.mousePosition) && !colorRect.Contains(e.mousePosition))
+            if (!typeRect.Contains(e.mousePosition) &&
+                !colorRect.Contains(e.mousePosition) &&
+                !tunnelRect.Contains(e.mousePosition))
             {
                 e.Use();
 
@@ -123,6 +127,8 @@ public class EnumMatrixData : ScriptableObject
                     value.type = CellType.Wall;
                 else if (value.type == CellType.Wall)
                     value.type = CellType.Car;
+                else if (value.type == CellType.Car)
+                    value.type = CellType.Tunnel;
                 else
                     value.type = CellType.None;
             }
@@ -132,15 +138,29 @@ public class EnumMatrixData : ScriptableObject
         value.type = (CellType)UnityEditor.EditorGUI.EnumFlagsField(typeRect, value.type);
 
         // ===== RESET =====
-        if (!value.type.HasFlag(CellType.Car))
-        {
+        if (!value.IsCar)
             value.carColor = default;
+
+        if (!value.IsTunnel)
+        {
+            value.tunnelColor = default;
+            value.tunnelType = default;
         }
 
-        // ===== COLOR PICK =====
-        if (value.type.HasFlag(CellType.Car))
+        // ===== COLOR =====
+        if (value.IsCar)
         {
             value.carColor = (ColorName)UnityEditor.EditorGUI.EnumPopup(colorRect, value.carColor);
+        }
+        else if (value.IsTunnel)
+        {
+            value.tunnelColor = (ColorName)UnityEditor.EditorGUI.EnumPopup(colorRect, value.tunnelColor);
+        }
+
+        // ===== TUNNEL TYPE =====
+        if (value.IsTunnel)
+        {
+            value.tunnelType = (ETunnelType)UnityEditor.EditorGUI.EnumPopup(tunnelRect, value.tunnelType);
         }
 
         // ===== BACKGROUND =====
@@ -150,20 +170,30 @@ public class EnumMatrixData : ScriptableObject
         {
             bg = Color.gray;
         }
-
-        if (value.IsCar)
+        else if (value.IsCar)
         {
-            // 🔥 dùng SO_Color thật
             if (colorConfig != null)
                 bg = colorConfig.GetColor(value.carColor);
             else
                 bg = Color.green;
         }
+        else if (value.IsTunnel)
+        {
+            if (colorConfig != null)
+                bg = colorConfig.GetColor(value.tunnelColor);
+            else
+                bg = Color.cyan;
+        }
 
         UnityEditor.EditorGUI.DrawRect(rect.Padding(1), bg);
 
         // ===== LABEL =====
-        GUI.Label(rect, value.type.ToString(), new GUIStyle()
+        string label = value.type.ToString();
+
+        if (value.IsTunnel)
+            label += "\n" + value.tunnelType.ToString();
+
+        GUI.Label(rect, label, new GUIStyle()
         {
             alignment = TextAnchor.MiddleCenter,
             normal = new GUIStyleState { textColor = Color.white }

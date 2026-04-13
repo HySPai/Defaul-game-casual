@@ -20,4 +20,5 @@ public class PrefabSO : ScriptableObject
     public GameObject carPre;
     public Cell wallPre;
     public Cell ground;
+    public Tunnel tunnelPre;
 }

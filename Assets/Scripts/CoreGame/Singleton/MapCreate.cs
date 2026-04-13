@@ -5,7 +5,6 @@ public class MapCreate : SingletonMonoBehaviour<MapCreate>
 {
     [SerializeField] private Transform mapPrent;
     [SerializeField] private EnumMatrixData matrixData;
-    [SerializeField] private PrefabSO prefabSO;
 
     [Header("Grid Setting")]
     [SerializeField] private float cellHeight;
@@ -14,6 +13,7 @@ public class MapCreate : SingletonMonoBehaviour<MapCreate>
     private Transform groundParent;
     private Transform wallParent;
     private Transform carParent;
+    private Transform tunnelParent;
 
     [Button]
     public void GenerateMap()
@@ -23,6 +23,7 @@ public class MapCreate : SingletonMonoBehaviour<MapCreate>
         SetupParents();
 
         SandImage.Instance.ApplyImage(matrixData.Picture);
+        PrefabSO prefabSO = PrefabSO.Instance;
 
         var matrix = matrixData.Matrix;
         int rows = matrix.GetLength(0);
@@ -50,6 +51,16 @@ public class MapCreate : SingletonMonoBehaviour<MapCreate>
                     wall.Row = r;
                     wall.Col = c;
                     Grid[r, c] = wall;
+                }
+                if (cell.type.HasFlag(CellType.Tunnel))
+                {
+                    var tunnel = Instantiate(prefabSO.tunnelPre, pos, Quaternion.identity, tunnelParent);
+
+                    tunnel.Init(
+                        matrixData.ColorConfig,
+                        cell.tunnelColor,
+                        cell.tunnelType
+                    );
                 }
                 if (cell.type.HasFlag(CellType.Car))
                 {
@@ -83,6 +94,7 @@ public class MapCreate : SingletonMonoBehaviour<MapCreate>
         groundParent = CreateChild("Ground");
         wallParent = CreateChild("Wall");
         carParent = CreateChild("Car");
+        tunnelParent = CreateChild("Tunnel");
     }
 
     private Transform CreateChild(string name)
